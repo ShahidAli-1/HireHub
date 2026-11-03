@@ -1,0 +1,97 @@
+﻿@model HireHub.ViewModels.Subscriptions.PlansViewModel
+@{
+    ViewData["Title"] = "Subscription Plans";
+    var isJobSeeker = Model.Role == "JobSeeker";
+    Layout = isJobSeeker ? "_JobSeekerLayout" : "_RecruiterLayout";
+}
+
+<h1 class="page-title">Upgrade Your Plan</h1>
+<p class="page-subtitle">Choose the plan that fits your needs.</p>
+
+@if (Model.LimitReached)
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+        <strong>You've reached your daily limit.</strong>
+        Upgrade to continue applying/posting today.
+    </div>
+}
+
+<div class="row g-4 mt-3">
+    @foreach (var plan in Model.Plans)
+    {
+        var isCurrent = plan.Name == Model.CurrentPlan;
+
+        <div class="col-md-6 col-lg-@(Model.Plans.Count == 3 ? "4" : "3")">
+            <div class="card h-100 plan-card @(plan.IsPopular ? "border-primary border-2 shadow-lg" : "border-0 shadow-sm") position-relative">
+                @if (plan.IsPopular)
+                {
+                    <div class="position-absolute top-0 start-50 translate-middle-x" style="margin-top:-14px;">
+                        <span class="badge bg-primary px-3 py-2">⭐ Most Popular</span>
+                    </div>
+                }
+
+                <div class="card-body p-4 text-center">
+                    <h5 class="fw-bold">@plan.Name</h5>
+
+                    <div class="my-3">
+                        @if (plan.Price == 0)
+                        {
+                            <span class="display-5 fw-bold text-dark">Free</span>
+                        }
+                        else
+                        {
+                            <span class="display-5 fw-bold text-dark">Rs. @plan.Price.ToString("N0")</span>
+                            <div class="small text-muted">per month</div>
+                        }
+                    </div>
+
+                    <ul class="list-unstyled text-start small mb-4">
+                        @foreach (var feature in plan.Features)
+                        {
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                @feature
+                            </li>
+                        }
+                    </ul>
+
+                    @if (isCurrent)
+                    {
+                        <button class="btn btn-outline-secondary w-100" disabled>
+                            <i class="bi bi-check2-circle"></i> Current Plan
+                        </button>
+                    }
+                    else if (plan.Price == 0)
+                    {
+                        <span class="text-muted small">Free tier</span>
+                    }
+                    else
+                    {
+                        <a asp-controller="Payment" asp-action="Submit" asp-route-plan="@plan.Name"
+                           class="btn @(plan.IsPopular ? "btn-primary" : "btn-outline-primary") w-100 fw-semibold">
+                            <i class="bi bi-arrow-up-circle"></i> Upgrade to @plan.Name
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="text-center mt-4">
+    <a asp-controller="Payment" asp-action="History" class="btn btn-outline-secondary">
+        <i class="bi bi-receipt"></i> View My Payment History
+    </a>
+</div>
+
+<style>
+    /* Plan Card Hover Effect */
+    .plan-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .plan-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.1) !important;
+    }
+</style>

@@ -1,0 +1,117 @@
+﻿@model List<HireHub.Models.Job>
+@{
+    ViewData["Title"] = "Moderate Jobs";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="admin-page-title">Moderate Jobs</h1>
+        <p class="admin-page-subtitle">Review and moderate all job posts on the platform.</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="admin-section-card">
+    <form method="get" asp-action="Jobs" class="row g-2">
+        <div class="col-md-6">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Search job title..." value="@ViewBag.Search" />
+        </div>
+        <div class="col-md-4">
+            <select name="status" class="form-select">
+                <option value="">All Statuses</option>
+                <option value="Active" selected="@(ViewBag.StatusFilter == "Active")">Active</option>
+                <option value="Closed" selected="@(ViewBag.StatusFilter == "Closed")">Closed</option>
+                <option value="Suspended" selected="@(ViewBag.StatusFilter == "Suspended")">Suspended</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-danger w-100"><i class="bi bi-search"></i> Filter</button>
+            <a asp-action="Jobs" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </form>
+</div>
+
+<div class="admin-section-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr class="text-muted small">
+                    <th>Title</th>
+                    <th>Company</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Applications</th>
+                    <th>Posted</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="7" class="text-center text-muted py-4">No jobs found.</td></tr>
+                }
+                else
+                {
+                    @foreach (var job in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@job.Title</td>
+                            <td class="small">
+                                @(job.Recruiter?.RecruiterProfile?.CompanyName ?? "—")
+                            </td>
+                            <td class="small text-muted">@job.Category?.Name</td>
+                            <td>
+                                @if (job.Status == "Active")
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else if (job.Status == "Closed")
+                                {
+                                    <span class="badge bg-secondary">Closed</span>
+                                }
+                                else if (job.Status == "Suspended")
+                                {
+                                    <span class="badge bg-danger">Suspended</span>
+                                }
+                            </td>
+                            <td class="small text-muted">@job.ApplicationCount</td>
+                            <td class="small text-muted">@job.CreatedAt.ToString("MMM dd")</td>
+                            <td class="text-end">
+                                <div class="d-flex gap-1 justify-content-end">
+                                    <a asp-controller="Jobs" asp-action="Detail" asp-route-id="@job.JobId"
+                                       target="_blank" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+
+                                    @if (job.Status == "Active")
+                                    {
+                                        <form asp-action="SuspendJob" asp-route-id="@job.JobId" method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Suspend this job? It will be hidden from the public listing.');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-slash-circle"></i> Suspend
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (job.Status == "Suspended")
+                                    {
+                                        <form asp-action="ReinstateJob" asp-route-id="@job.JobId" method="post"
+                                              class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-check-circle"></i> Reinstate
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

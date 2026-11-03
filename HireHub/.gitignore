@@ -1,0 +1,17 @@
+﻿# ==========================================
+# VISUAL STUDIO & BUILD FILES
+# ==========================================
+.vs/
+bin/
+obj/
+*.user
+*.suo
+
+# ==========================================
+# CUSTOM HIREHUB SECRETS (DO NOT DELETE)
+# ==========================================
+appsettings.json
+
+# Uploaded files (Resumes, Logos, Payment Proofs)
+wwwroot/uploads/*
+!wwwroot/uploads/.gitkeep

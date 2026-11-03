@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HireHub</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Left Side (Hidden on Mobile) -->
+            <div class="col-lg-6 d-none d-lg-flex auth-left">
+                <div class="position-relative" style="z-index: 2;">
+                    <div class="d-inline-flex align-items-center gap-2 mb-4 px-3 py-2 rounded-pill" 
+                         style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                        <i class="bi bi-briefcase-fill"></i> <span class="fw-bold">HireHub</span>
+                    </div>
+                    <h1>Find your next<br/>big opportunity.</h1>
+                    <p>Join Pakistan's fastest-growing job platform. Apply in one click and get hired faster.</p>
+                </div>
+            </div>
+
+            <!-- Right Side (Form) -->
+            <div class="col-lg-6 auth-right">
+                <div class="auth-card">
+                    <!-- Logo for Mobile -->
+                    <div class="text-center mb-4 d-lg-none">
+                        <h3 class="fw-bold text-primary"><i class="bi bi-briefcase-fill"></i> HireHub</h3>
+                    </div>
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success border-0 rounded-3 shadow-sm mb-4">
+                            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+                        </div>
+                    }
+
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

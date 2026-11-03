@@ -1,0 +1,161 @@
+﻿@using System.Security.Claims
+@{
+    var fullName = User.FindFirst(ClaimTypes.Name)?.Value ?? "Recruiter";
+    var plan = User.FindFirst("CurrentPlan")?.Value ?? "Free";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HireHub</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- MOBILE HEADER -->
+    <div class="mobile-header">
+        <div class="brand-text"><i class="bi bi-briefcase-fill text-primary"></i> HireHub</div>
+        <button class="btn btn-outline-light btn-sm" id="mobileMenuBtn">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+    </div>
+
+    <!-- OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dashboard-wrapper">
+        <!-- ============ SIDEBAR ============ -->
+        <aside class="sidebar" id="mainSidebar">
+            <div class="brand">
+                <i class="bi bi-briefcase-fill"></i> HireHub
+            </div>
+
+            <div class="user-block">
+                <div class="name">@fullName</div>
+                <span class="plan-badge">@plan Plan</span>
+            </div>
+
+            <ul class="nav-list">
+                <li>
+                    <a asp-controller="Recruiter" asp-action="Index"
+                       class="@(currentController == "Recruiter" && currentAction == "Index" ? "active" : "")">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Recruiter" asp-action="CompanyProfile"
+                       class="@(currentAction == "CompanyProfile" ? "active" : "")">
+                        <i class="bi bi-building"></i> Company Profile
+                    </a>
+                </li>
+
+                <div class="divider">Jobs</div>
+
+                <li>
+                    <a asp-controller="Recruiter" asp-action="PostJob"
+                       class="@(currentAction == "PostJob" ? "active" : "")">
+                        <i class="bi bi-plus-circle"></i> Post a Job
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Recruiter" asp-action="MyJobs"
+                       class="@(currentAction == "MyJobs" || currentAction == "EditJob" ? "active" : "")">
+                        <i class="bi bi-list-check"></i> My Jobs
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Recruiter" asp-action="Applicants"
+                       class="@(currentAction == "Applicants" ? "active" : "")">
+                        <i class="bi bi-people"></i> Applicants
+                    </a>
+                </li>
+
+                <div class="divider">Account</div>
+
+                <li>
+                    <a asp-controller="Subscription" asp-action="Plans"
+                       class="@(currentController == "Subscription" ? "active" : "")">
+                        <i class="bi bi-star"></i> Upgrade Plan
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Notification" asp-action="Index">
+                        <i class="bi bi-bell"></i> Notifications
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Account" asp-action="Settings">
+                        <i class="bi bi-gear"></i> Account Settings
+                    </a>
+                </li>
+                <li>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="sidebar-logout-btn">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- ============ MAIN CONTENT ============ -->
+        <main class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const menuBtn = document.getElementById('mobileMenuBtn');
+                const sidebar = document.getElementById('mainSidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+
+                if(menuBtn) {
+                    menuBtn.addEventListener('click', function() {
+                        sidebar.classList.toggle('show');
+                        overlay.classList.toggle('show');
+                    });
+                }
+                if(overlay) {
+                    overlay.addEventListener('click', function() {
+                        sidebar.classList.remove('show');
+                        overlay.classList.remove('show');
+                    });
+                }
+
+                @if (TempData["Success"] != null)
+                {
+                        <text>
+                                Toastify({
+                                    text: "@Html.Raw(TempData["Success"])",
+                                    duration: 4000, close: true, gravity: "bottom", position: "right",
+                                    style: { background: "linear-gradient(to right, #059669, #10b981)", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }
+                                }).showToast();
+                        </text>
+                }
+                @if (TempData["Error"] != null)
+                {
+                        <text>
+                                Toastify({
+                                    text: "@Html.Raw(TempData["Error"])",
+                                    duration: 5000, close: true, gravity: "bottom", position: "right",
+                                    style: { background: "linear-gradient(to right, #dc2626, #ef4444)", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }
+                                }).showToast();
+                        </text>
+                }
+            });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

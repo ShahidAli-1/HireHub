@@ -1,0 +1,78 @@
+﻿@model List<HireHub.Models.SavedJob>
+@{
+    ViewData["Title"] = "Saved Jobs";
+    Layout = "_JobSeekerLayout";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="page-title">Saved Jobs</h1>
+        <p class="page-subtitle">Jobs you've bookmarked to apply later.</p>
+    </div>
+    <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary">
+        <i class="bi bi-search"></i> Browse More Jobs
+    </a>
+</div>
+
+<div class="section-card">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-bookmark"></i>
+            <p>You haven't saved any jobs yet.</p>
+            <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary btn-sm">
+                <i class="bi bi-search"></i> Browse Jobs
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr class="text-muted small">
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Location</th>
+                        <th>Saved On</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var saved in Model)
+                    {
+                        <tr>
+                            <td>
+                                <a asp-controller="Jobs" asp-action="Detail" asp-route-id="@saved.JobId" class="text-decoration-none fw-bold text-dark">
+                                    @saved.Job?.Title
+                                </a>
+                                <div class="small text-muted mt-1">
+                                    <span class="badge bg-light text-dark border">@saved.Job?.JobType</span>
+                                </div>
+                            </td>
+                            <td class="small">
+                                @(saved.Job?.Recruiter?.RecruiterProfile?.CompanyName ?? "—")
+                            </td>
+                            <td class="small text-muted">@saved.Job?.Location</td>
+                            <td class="small text-muted">@saved.SavedAt.ToString("MMM dd, yyyy")</td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a asp-controller="Jobs" asp-action="Detail" asp-route-id="@saved.JobId" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    
+                                    <form asp-action="ToggleSaveJob" asp-route-jobId="@saved.JobId" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove from saved">
+                                            <i class="bi bi-bookmark-x"></i> Remove
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

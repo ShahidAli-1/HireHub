@@ -1,0 +1,154 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_JobSeekerLayout";
+
+    var user = ViewBag.User as HireHub.Models.User;
+    var recentApps = ViewBag.RecentApplications as List<HireHub.Models.Application> ?? new();
+    var recommended = ViewBag.RecommendedJobs as List<HireHub.Models.Job> ?? new();
+}
+
+<h1 class="page-title">Welcome back, @user?.FullName </h1>
+<p class="page-subtitle">Here's what's happening with your job search.</p>
+
+<!-- ====== STAT CARDS ====== -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-indigo"><i class="bi bi-file-earmark-text"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.TotalApplications</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-yellow"><i class="bi bi-star"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.Shortlisted</div>
+                <div class="stat-label">Shortlisted</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-blue"><i class="bi bi-camera-video"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.Interviews</div>
+                <div class="stat-label">Interviews</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-green"><i class="bi bi-award"></i></div>
+            <div>
+                <div class="stat-value">@user?.CurrentPlan</div>
+                <div class="stat-label">Current Plan</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- ====== RECENT APPLICATIONS ====== -->
+    <div class="col-lg-7">
+        <div class="section-card">
+            <h5>
+                Recent Applications
+              <a asp-controller="Applications" asp-action="MyApplications" class="btn btn-sm btn-outline-primary">View All</a>
+            </h5>
+
+            @if (!recentApps.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>No applications yet. Start applying!</p>
+                    <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary btn-sm">
+                        <i class="bi bi-search"></i> Browse Jobs
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>Job</th>
+                                <th>Company</th>
+                                <th>Applied</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var app in recentApps)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-controller="Jobs" asp-action="Detail" asp-route-id="@app.JobId" class="text-decoration-none fw-semibold">
+                                            @app.Job?.Title
+                                        </a>
+                                    </td>
+                                    <td class="text-muted small">
+                                        @(app.Job?.Recruiter?.RecruiterProfile?.CompanyName ?? "—")
+                                    </td>
+                                    <td class="text-muted small">
+                                        @app.AppliedAt.ToString("MMM dd")
+                                    </td>
+                                    <td>
+                                        <span class="badge-soft @app.Status.ToLower()">@app.Status</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- ====== RECOMMENDED JOBS ====== -->
+    <div class="col-lg-5">
+        <div class="section-card">
+            <h5>
+                Recommended Jobs
+                <a asp-controller="Jobs" asp-action="Index" class="btn btn-sm btn-outline-primary">See All</a>
+            </h5>
+
+            @if (!recommended.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-briefcase"></i>
+                    <p>No jobs available right now.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var job in recommended)
+                {
+                    <div class="border-bottom pb-3 mb-3">
+                        <a asp-controller="Jobs" asp-action="Detail" asp-route-id="@job.JobId" class="text-decoration-none">
+                            <div class="fw-semibold text-dark">@job.Title</div>
+                        </a>
+                        <div class="small text-muted">
+                            <i class="bi bi-building"></i>
+                            @(job.Recruiter?.RecruiterProfile?.CompanyName ?? "Company")
+                            &nbsp;·&nbsp;
+                            <i class="bi bi-geo-alt"></i> @job.Location
+                        </div>
+                        <div class="mt-2">
+                            <span class="badge bg-light text-dark border">@job.JobType</span>
+                            @if (job.IsFeatured)
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-star-fill"></i> Featured
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

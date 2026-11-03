@@ -1,0 +1,282 @@
+﻿@model HireHub.Models.Job
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
+
+    bool alreadyApplied = ViewBag.AlreadyApplied ?? false;
+    bool isSaved = ViewBag.IsSaved ?? false;
+    var company = Model.Recruiter?.RecruiterProfile;
+}
+
+<div class="my-4">
+    <!-- ===== BREADCRUMB ===== -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-action="Index">Jobs</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index" asp-route-categoryId="@Model.CategoryId">@Model.Category?.Name</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h1 class="fw-bold mb-2">@Model.Title</h1>
+
+                            <div class="text-muted mb-3">
+                                <i class="bi bi-building"></i>
+                                <strong>@(company?.CompanyName ?? "Company")</strong>
+                                @if (company?.IsVerified == true)
+                                {
+                                    <i class="bi bi-patch-check-fill text-primary ms-1" title="Verified"></i>
+                                }
+                                &nbsp;·&nbsp;
+                                <i class="bi bi-geo-alt"></i> @(Model.Location ?? "Not specified")
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-primary">@Model.JobType</span>
+                                @if (!string.IsNullOrEmpty(Model.ExperienceLevel))
+                                {
+                                    <span class="badge bg-info text-dark">@Model.ExperienceLevel</span>
+                                }
+                                <span class="badge bg-secondary">@Model.Category?.Name</span>
+                                @if (Model.IsFeatured)
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-star-fill"></i> Featured
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Job info cards -->
+                    <div class="row g-3 mb-4">
+                        @if (!string.IsNullOrEmpty(Model.SalaryRange))
+                        {
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <div class="small text-muted">Salary Range</div>
+                                    <div class="fw-semibold text-success">
+                                        <i class="bi bi-cash"></i> @Model.SalaryRange
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.Deadline.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <div class="small text-muted">Application Deadline</div>
+                                    <div class="fw-semibold">
+                                        <i class="bi bi-calendar-event"></i>
+                                        @Model.Deadline.Value.ToString("MMMM dd, yyyy")
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <div class="small text-muted">Posted</div>
+                                <div class="fw-semibold">
+                                    <i class="bi bi-clock-history"></i>
+                                    @Model.CreatedAt.ToString("MMMM dd, yyyy")
+                                </div>
+                            </div>
+                        </div>
+                            <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <div class="small text-muted">Applicants</div>
+                                <div class="fw-semibold">
+                                    <i class="bi bi-people"></i> @ViewBag.ApplicantCount applied
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <h4 class="fw-bold mt-4">Job Description</h4>
+                    <div class="job-description">
+                        @Html.Raw(Model.Description)
+                    </div>
+
+                    <!-- Requirements -->
+                    @if (!string.IsNullOrEmpty(Model.Requirements))
+                    {
+                        <h4 class="fw-bold mt-4">Requirements</h4>
+                        <div class="job-description">
+                            @Html.Raw(Model.Requirements.Replace("\n", "<br />"))
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SIDEBAR ===== -->
+        <div class="col-lg-4">
+            <!-- Apply card -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("JobSeeker"))
+                    {
+                        <h5 class="fw-bold mb-3">Ready to apply?</h5>
+                        
+                        @if (alreadyApplied)
+                        {
+                            <div class="alert alert-success mb-3">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <strong>Already Applied</strong>
+                                <p class="small mb-0 mt-1">You've submitted an application for this job.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted small">Submit your application with a cover letter.</p>
+                            <a asp-controller="Applications" asp-action="Apply" asp-route-jobId="@Model.JobId"
+                               class="btn btn-primary w-100 mb-2">
+                                <i class="bi bi-send"></i> Apply Now
+                            </a>
+                        }
+
+                        <!-- Save Job Button (Only show if NOT applied) -->
+                        @if (!alreadyApplied)
+                        {
+                            <form asp-controller="JobSeeker" asp-action="ToggleSaveJob" method="post" class="w-100 mt-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="jobId" value="@Model.JobId" />
+                                <input type="hidden" name="returnUrl" value="@Url.Action("Detail", "Jobs", new { id = Model.JobId })" />
+                                
+                                @if (isSaved)
+                                {
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-bookmark-check-fill"></i> Saved
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-outline-secondary w-100">
+                                        <i class="bi bi-bookmark"></i> Save Job
+                                    </button>
+                                }
+                            </form>
+                        }
+                    }
+                    else if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="alert alert-info small mb-0">
+                            <i class="bi bi-info-circle"></i>
+                            Only job seekers can apply for jobs.
+                        </div>
+                    }
+                    else
+                    {
+                        <h5 class="fw-bold mb-3">Want to apply?</h5>
+                        <p class="text-muted small">Login or create a free account to apply.</p>
+
+                        <a asp-controller="Account" asp-action="Login"
+                           asp-route-returnUrl="@Url.Action("Detail", "Jobs", new { id = Model.JobId })"
+                           class="btn btn-primary w-100 mb-2">
+                            <i class="bi bi-box-arrow-in-right"></i> Login to Apply
+                        </a>
+                        <a asp-controller="Account" asp-action="Register" asp-route-role="JobSeeker"
+                           class="btn btn-outline-primary w-100">
+                            <i class="bi bi-person-plus"></i> Create Account
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Company card -->
+            @if (company != null)
+            {
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">About the Company</h6>
+
+                        <div class="d-flex align-items-center mb-3">
+                            @if (!string.IsNullOrEmpty(company.CompanyLogoPath))
+                            {
+                                <img src="@company.CompanyLogoPath" alt="@company.CompanyName"
+                                     class="rounded me-3" style="width:56px;height:56px;object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <div class="rounded bg-primary text-white d-flex align-items-center justify-content-center me-3"
+                                     style="width:56px;height:56px;">
+                                    <i class="bi bi-building" style="font-size:1.5rem;"></i>
+                                </div>
+                            }
+                            <div>
+                                <div class="fw-bold">@company.CompanyName</div>
+                                @if (company.IsVerified == true)
+                                {
+                                    <span class="badge bg-primary">
+                                        <i class="bi bi-patch-check-fill"></i> Verified
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(company.Industry))
+                        {
+                            <div class="small mb-2">
+                                <i class="bi bi-briefcase text-muted"></i> @company.Industry
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(company.CompanySize))
+                        {
+                            <div class="small mb-2">
+                                <i class="bi bi-people text-muted"></i> @company.CompanySize employees
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(company.Location))
+                        {
+                            <div class="small mb-2">
+                                <i class="bi bi-geo-alt text-muted"></i> @company.Location
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(company.Website))
+                        {
+                            <div class="small mb-2">
+                                <i class="bi bi-globe text-muted"></i>
+                                <a href="@company.Website" target="_blank" rel="noopener">@company.Website</a>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(company.About))
+                        {
+                            <hr />
+                            <p class="small text-muted mb-0">
+                                @(company.About.Length > 200 ? company.About.Substring(0, 200) + "..." : company.About)
+                            </p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .job-description {
+        line-height: 1.7;
+        color: #334155;
+    }
+    .job-description ul,
+    .job-description ol {
+        padding-left: 1.5rem;
+    }
+    .job-description h1,
+    .job-description h2,
+    .job-description h3 {
+        margin-top: 1.25rem;
+        font-weight: 700;
+    }
+</style>

@@ -1,0 +1,121 @@
+﻿@model List<HireHub.Models.Application>
+@{
+    ViewData["Title"] = "My Applications";
+    Layout = "_JobSeekerLayout";
+
+    int appsToday = ViewBag.ApplicationsToday ?? 0;
+    int dailyLimit = ViewBag.DailyLimit ?? 10;
+    string currentPlan = ViewBag.CurrentPlan ?? "Free";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="page-title">My Applications</h1>
+        <p class="page-subtitle">Track all the jobs you've applied to.</p>
+    </div>
+    <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary">
+        <i class="bi bi-search"></i> Browse More Jobs
+    </a>
+</div>
+
+<!-- Daily usage banner -->
+<div class="alert @(appsToday >= dailyLimit ? "alert-warning" : "alert-info") d-flex justify-content-between align-items-center">
+    <div>
+        <i class="bi bi-graph-up-arrow"></i>
+        <strong>Today's usage:</strong> @appsToday / @(dailyLimit == int.MaxValue ? "∞" : dailyLimit.ToString()) applications
+        <span class="badge bg-light text-dark ms-2">@currentPlan Plan</span>
+    </div>
+    @if (appsToday >= dailyLimit)
+    {
+        <a asp-controller="Subscription" asp-action="Plans" class="btn btn-sm btn-warning">
+            <i class="bi bi-star"></i> Upgrade Plan
+        </a>
+    }
+</div>
+
+<div class="section-card">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>You haven't applied for any jobs yet.</p>
+            <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary btn-sm">
+                <i class="bi bi-search"></i> Browse Jobs
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr class="text-muted small">
+                        <th>Job</th>
+                        <th>Company</th>
+                        <th>Applied</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var app in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@app.Job?.Title</div>
+                                <div class="small text-muted">
+                                    <i class="bi bi-tag"></i> @app.Job?.Category?.Name
+                                </div>
+                            </td>
+                            <td class="small">
+                                @app.Job?.Recruiter?.RecruiterProfile?.CompanyName
+                                @if (app.Job?.Recruiter?.RecruiterProfile?.IsVerified == true)
+                                {
+                                    <i class="bi bi-patch-check-fill text-primary"></i>
+                                }
+                            </td>
+                            <td class="small text-muted">
+                                @app.AppliedAt.ToString("MMM dd, yyyy")
+                            </td>
+                            <td>
+                                @{
+                                    var statusClass = app.Status.ToLower();
+                                }
+                                <span class="badge-soft @statusClass">@app.Status</span>
+                                
+                                <!-- Interview Details -->
+                                @if (!string.IsNullOrEmpty(app.InterviewDetails))
+                                {
+                                    <div class="small text-primary mt-2 p-2 bg-primary bg-opacity-10 rounded" style="white-space: pre-line;">
+                                        <strong><i class="bi bi-calendar-event"></i> Interview Scheduled</strong><br/>
+                                        @app.InterviewDetails.Replace(" | ", "\n")
+                                    </div>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex gap-1 justify-content-end">
+                                    <a asp-controller="Jobs" asp-action="Detail" asp-route-id="@app.JobId"
+                                       class="btn btn-sm btn-outline-primary" title="View Job">
+                                        <i class="bi bi-eye"></i> View Job
+                                    </a>
+
+                                    @if (app.Status != "Hired")
+                                    {
+                                        <form asp-action="Withdraw" asp-route-id="@app.ApplicationId" method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to withdraw this application? You will need to apply again.');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Withdraw Application">
+                                                <i class="bi bi-x-circle"></i> Withdraw
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

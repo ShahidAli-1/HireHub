@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HireHub</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/HireHub.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-briefcase-fill text-primary"></i> HireHub
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        @* <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Jobs" asp-action="Index">Browse Jobs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li> *@
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle"></i> @User.Identity.Name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Settings">
+                                            <i class="bi bi-gear"></i> Account Settings
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-box-arrow-right"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item d-flex align-items-center">
+                                <a class="nav-link fw-semibold text-dark me-3 nav-login-btn d-flex align-items-center gap-1" asp-controller="Account" asp-action="Login" style="font-size: 0.9rem;">
+                                    <i class="bi bi-person"></i> Login
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-dark rounded-pill px-3 py-1 fw-semibold shadow-sm nav-signup-btn d-flex align-items-center gap-1" asp-controller="Account" asp-action="Register" style="font-size: 0.9rem;">
+                                    <i class="bi bi-rocket-takeoff"></i> Sign Up
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    @{
+        var isHomePage = ViewContext.RouteData.Values["controller"]?.ToString() == "Home" 
+                      && ViewContext.RouteData.Values["action"]?.ToString() == "Index";
+    }
+
+    @if (isHomePage)
+    {
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    }
+    else
+    {
+        <div class="container">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+    }
+
+    @* <footer class="border-top footer text-muted mt-auto bg-white" style="z-index: 10;">
+        <div class="container py-3 d-flex justify-content-between align-items-center">
+            <div>&copy; @DateTime.Now.Year - HireHub</div>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+        </div>
+    </footer> *@
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script>
+        @if (TempData["Success"] != null)
+        {
+            <text>
+                Toastify({
+                    text: "@Html.Raw(TempData["Success"])",
+                    duration: 4000,
+                    close: true,
+                    gravity: "bottom", position: "right", 
+                    style: { background: "linear-gradient(to right, #059669, #10b981)", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }
+                }).showToast();
+            </text>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <text>
+                Toastify({
+                    text: "@Html.Raw(TempData["Error"])",
+                    duration: 5000,
+                    close: true,
+                    gravity: "bottom", position: "right", 
+                    style: { background: "linear-gradient(to right, #dc2626, #ef4444)", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }
+                }).showToast();
+            </text>
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

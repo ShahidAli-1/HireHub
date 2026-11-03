@@ -1,0 +1,140 @@
+﻿@model List<HireHub.Models.Job>
+@{
+    ViewData["Title"] = "My Jobs";
+    Layout = "_RecruiterLayout";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="page-title">My Jobs</h1>
+        <p class="page-subtitle">Manage all your posted jobs in one place.</p>
+    </div>
+    <a asp-action="PostJob" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Post New Job
+    </a>
+</div>
+
+<div class="section-card">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-briefcase"></i>
+            <p>You haven't posted any jobs yet.</p>
+            <a asp-action="PostJob" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Post Your First Job
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                                <thead>
+                    <tr class="text-muted small">
+                        <th>Title</th>
+                        <th class="hide-mobile">Category</th> <!-- HIDDEN -->
+                        <th class="hide-mobile">Type</th>     <!-- HIDDEN -->
+                        <th class="hide-mobile">Location</th> <!-- HIDDEN -->
+                        <th class="text-center">Applications</th>
+                        <th>Status</th>
+                        <th class="hide-mobile">Posted</th>   <!-- HIDDEN -->
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var job in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@job.Title</div>
+                                @if (job.IsFeatured)
+                                {
+                                    <span class="badge bg-warning text-dark mt-1">
+                                        <i class="bi bi-star-fill"></i> Featured
+                                    </span>
+                                }
+                            </td>
+                            <td class="small text-muted">@job.Category?.Name</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">@job.JobType</span>
+                            </td>
+                            <td class="small text-muted">@job.Location</td>
+                            <td class="text-center">
+                                <span class="badge bg-info text-dark">@job.ApplicationCount</span>
+                            </td>
+                            <td>
+                                @if (job.Status == "Active")
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else if (job.Status == "Closed")
+                                {
+                                    <span class="badge bg-secondary">Closed</span>
+                                }
+                                else if (job.Status == "Expired")
+                                {
+                                    <span class="badge bg-dark">Expired</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">@job.Status</span>
+                                }
+                            </td>
+                            <td class="small text-muted">@job.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                                      <td class="text-end">
+                                <div class="d-flex gap-1 justify-content-end text-nowrap">
+                                    
+                                    <!-- EDIT -->
+                                    <a asp-action="EditJob" asp-route-id="@job.JobId"
+                                       class="btn btn-outline-primary" 
+                                       style="font-size: 0.75rem; padding: 0.2rem 0.5rem;" title="Edit">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+
+                                    <!-- CONDITIONAL: CLOSE OR REOPEN -->
+                                    @if (job.Status == "Active")
+                                    {
+                                        <form asp-action="CloseJob" asp-route-id="@job.JobId" method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Close this job? Job seekers will no longer see it.');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-warning" 
+                                                    style="font-size: 0.75rem; padding: 0.2rem 0.5rem;" title="Close">
+                                                <i class="bi bi-pause-circle"></i> Close
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (job.Status == "Closed")
+                                    {
+                                        <form asp-action="ReopenJob" asp-route-id="@job.JobId" method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Reopen this job? It will be active for another 30 days.');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-success" 
+                                                    style="font-size: 0.75rem; padding: 0.2rem 0.5rem;" title="Reopen">
+                                                <i class="bi bi-play-circle"></i> Reopen
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <!-- DELETE -->
+                                    <form asp-action="DeleteJob" asp-route-id="@job.JobId" method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to permanently delete this job? All applicant data for this job will be lost.');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger" 
+                                                style="font-size: 0.75rem; padding: 0.2rem 0.5rem;" title="Delete">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+</div>

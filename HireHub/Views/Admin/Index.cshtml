@@ -1,0 +1,227 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout"; // <-- This makes the dark sidebar appear
+
+    var recentUsers = ViewBag.RecentUsers as List<HireHub.Models.User> ?? new();
+    var recentPayments = ViewBag.RecentPayments as List<HireHub.Models.Payment> ?? new();
+    decimal totalRevenue = ViewBag.TotalRevenue ?? 0m;
+}
+
+<h1 class="admin-page-title">Admin Dashboard</h1>
+<p class="admin-page-subtitle">Overview of the HireHub platform</p>
+
+<!-- ====== STAT CARDS ROW 1 ====== -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="admin-stat-card">
+            <div class="stat-icon bg-blue"><i class="bi bi-people"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.TotalUsers</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="admin-stat-card success">
+            <div class="stat-icon bg-green"><i class="bi bi-briefcase"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.TotalJobs</div>
+                <div class="stat-label">Total Jobs</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="admin-stat-card info">
+            <div class="stat-icon bg-blue"><i class="bi bi-file-earmark-text"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.TotalApplications</div>
+                <div class="stat-label">Applications</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="admin-stat-card warning">
+            <div class="stat-icon bg-amber"><i class="bi bi-cash-coin"></i></div>
+            <div>
+                <div class="stat-value">Rs. @totalRevenue.ToString("N0")</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== STAT CARDS ROW 2 (Alerts) ====== -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="admin-stat-card success">
+            <div class="stat-icon bg-green"><i class="bi bi-check2-circle"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.ActiveSubscriptions</div>
+                <div class="stat-label">Active Subscriptions</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CLICKABLE PENDING PAYMENTS CARD -->
+    <div class="col-md-6 col-lg-3">
+        <a asp-action="Payments" class="text-decoration-none">
+            <div class="admin-stat-card warning" style="cursor: pointer;">
+                <div class="stat-icon bg-amber"><i class="bi bi-hourglass-split"></i></div>
+                <div>
+                    <div class="stat-value">@ViewBag.PendingPayments</div>
+                    <div class="stat-label">Pending Payments</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="admin-stat-card">
+            <div class="stat-icon bg-red"><i class="bi bi-patch-exclamation"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.PendingRecruiters</div>
+                <div class="stat-label">Recruiters to Verify</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="admin-stat-card info">
+            <div class="stat-icon bg-blue"><i class="bi bi-briefcase-fill"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.ActiveJobs</div>
+                <div class="stat-label">Active Jobs</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== QUICK ACTIONS ====== -->
+<div class="admin-section-card">
+    <h5>Quick Actions</h5>
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="Users" class="admin-quick-btn">
+            <i class="bi bi-people"></i> Manage Users
+        </a>
+        <a asp-action="Recruiters" class="admin-quick-btn">
+            <i class="bi bi-patch-check"></i> Verify Recruiters
+        </a>
+        <a asp-action="Payments" class="admin-quick-btn danger">
+            <i class="bi bi-credit-card"></i> Approve Payments
+            @if ((int)ViewBag.PendingPayments > 0)
+            {
+                <span class="badge bg-light text-danger ms-1">@ViewBag.PendingPayments</span>
+            }
+        </a>
+        <a asp-action="Categories" class="admin-quick-btn">
+            <i class="bi bi-tags"></i> Categories
+        </a>
+        <a asp-action="Revenue" class="admin-quick-btn">
+            <i class="bi bi-bar-chart"></i> Revenue Reports
+        </a>
+    </div>
+</div>
+
+<!-- ====== RECENT ACTIVITY ====== -->
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="admin-section-card">
+            <h5>
+                Recent Users
+                <a asp-action="Users" class="btn btn-sm btn-outline-dark">View All</a>
+            </h5>
+
+            @if (!recentUsers.Any())
+            {
+                <div class="text-muted py-3 text-center">No users yet.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var u in recentUsers)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@u.FullName</td>
+                                    <td class="text-muted small">@u.Email</td>
+                                    <td>
+                                        @if (u.Role == "Admin")
+                                        {
+                                            <span class="badge bg-danger">Admin</span>
+                                        }
+                                        else if (u.Role == "Recruiter")
+                                        {
+                                            <span class="badge bg-primary">Recruiter</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info text-dark">JobSeeker</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="admin-section-card">
+            <h5>
+                Recent Payments
+                <a asp-action="Payments" class="btn btn-sm btn-outline-dark">View All</a>
+            </h5>
+
+            @if (!recentPayments.Any())
+            {
+                <div class="text-muted py-3 text-center">No payments yet.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in recentPayments)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@p.User?.FullName</td>
+                                    <td>Rs. @p.Amount.ToString("N0")</td>
+                                    <td>
+                                        @if (p.Status == "Approved")
+                                        {
+                                            <span class="badge bg-success">Approved</span>
+                                        }
+                                        else if (p.Status == "Rejected")
+                                        {
+                                            <span class="badge bg-danger">Rejected</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

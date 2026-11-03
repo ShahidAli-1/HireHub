@@ -1,0 +1,110 @@
+﻿@model HireHub.ViewModels.Subscriptions.SubmitPaymentViewModel
+@{
+    ViewData["Title"] = "Submit Payment";
+    var isJobSeeker = User.IsInRole("JobSeeker");
+    Layout = isJobSeeker ? "_JobSeekerLayout" : "_RecruiterLayout";
+    var planDetails = ViewBag.PlanDetails as HireHub.Helpers.PlanDetails;
+}
+
+<h1 class="page-title">Submit Payment</h1>
+<p class="page-subtitle">Complete the bank transfer, then submit the proof below.</p>
+
+<div class="row g-4">
+    <!-- LEFT: Bank info -->
+    <div class="col-lg-5">
+        <div class="section-card">
+            <h5><i class="bi bi-bank"></i> Bank Transfer Details</h5>
+
+            <div class="mb-2 small">
+                <div class="text-muted">Bank</div>
+                <div class="fw-semibold">Meezan Bank</div>
+            </div>
+            <div class="mb-2 small">
+                <div class="text-muted">Account Title</div>
+                <div class="fw-semibold">HireHub (Pvt) Ltd</div>
+            </div>
+            <div class="mb-2 small">
+                <div class="text-muted">Account Number</div>
+                <div class="fw-semibold">0123 4567 8901 2345</div>
+            </div>
+            <div class="mb-2 small">
+                <div class="text-muted">IBAN</div>
+                <div class="fw-semibold">PK00MEZN0001234567890123</div>
+            </div>
+            <div class="mb-3 small">
+                <div class="text-muted">Amount to send</div>
+                <div class="display-6 fw-bold text-primary">Rs. @Model.Amount.ToString("N0")</div>
+            </div>
+
+            <div class="alert alert-info small mb-0">
+                <i class="bi bi-info-circle"></i>
+                After transferring <strong>Rs. @Model.Amount.ToString("N0")</strong>,
+                come back and submit the reference number below.
+            </div>
+        </div>
+
+        @if (planDetails != null)
+        {
+            <div class="section-card mt-3">
+                <h6 class="fw-bold">@planDetails.Name Plan</h6>
+                <ul class="list-unstyled small mb-0">
+                    @foreach (var f in planDetails.Features)
+                    {
+                        <li class="mb-1">
+                            <i class="bi bi-check text-success"></i> @f
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+
+    <!-- RIGHT: Form -->
+    <div class="col-lg-7">
+        <form asp-action="Submit" method="post" enctype="multipart/form-data" class="section-card">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="PlanName" />
+            <input type="hidden" asp-for="Amount" />
+
+            <h5 class="mb-3"><i class="bi bi-credit-card"></i> Payment Proof</h5>
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="ReferenceNumber" class="form-label">Transaction Reference Number <span class="text-danger">*</span></label>
+                <input asp-for="ReferenceNumber" class="form-control"
+                       placeholder="e.g. TXN123456789 or bank slip reference" />
+                <span asp-validation-for="ReferenceNumber" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ProofImage" class="form-label">Screenshot of transfer (optional but recommended)</label>
+                <input asp-for="ProofImage" type="file" class="form-control" accept=".jpg,.jpeg,.png,.pdf" />
+                <small class="text-muted">Max 5 MB. JPG, PNG, or PDF.</small>
+                <span asp-validation-for="ProofImage" class="text-danger small d-block"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label">Additional notes (optional)</label>
+                <textarea asp-for="Notes" class="form-control" rows="2"
+                          placeholder="Anything our team should know?"></textarea>
+            </div>
+
+            <div class="alert alert-warning small">
+                <i class="bi bi-clock-history"></i>
+                Payments are manually reviewed. Your plan activates within <strong>24 hours</strong> of approval.
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send"></i> Submit Payment
+                </button>
+                <a asp-controller="Subscription" asp-action="Plans" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,137 @@
+﻿@model HireHub.ViewModels.Admin.UsersListViewModel
+@{
+    ViewData["Title"] = "Manage Users";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="admin-page-title">Manage Users</h1>
+        <p class="admin-page-subtitle">All registered users on the platform.</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="admin-section-card">
+    <form method="get" asp-action="Users" class="row g-2">
+        <div class="col-md-4">
+            <input type="text" name="search" class="form-control" placeholder="Search by name or email..."
+                   value="@Model.Search" />
+        </div>
+        <div class="col-md-3">
+            <select name="role" class="form-select">
+                <option value="">All Roles</option>
+                <option value="JobSeeker" selected="@(Model.RoleFilter == "JobSeeker")">Job Seeker</option>
+                <option value="Recruiter" selected="@(Model.RoleFilter == "Recruiter")">Recruiter</option>
+                <option value="Admin" selected="@(Model.RoleFilter == "Admin")">Admin</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="active" class="form-select">
+                <option value="">All Status</option>
+                <option value="true" selected="@(Model.ActiveFilter == true)">Active</option>
+                <option value="false" selected="@(Model.ActiveFilter == false)">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-danger w-100">
+                <i class="bi bi-search"></i> Filter
+            </button>
+            <a asp-action="Users" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </form>
+</div>
+
+<div class="admin-section-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0 fw-bold">@Model.TotalUsers user(s) found</h6>
+        <div>
+            <span class="badge bg-success">Active: @Model.ActiveCount</span>
+            <span class="badge bg-secondary">Inactive: @Model.InactiveCount</span>
+        </div>
+    </div>
+
+    @if (!Model.Users.Any())
+    {
+        <div class="text-center text-muted py-5">No users match your filters.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                                <thead>
+                    <tr class="text-muted small">
+                        <th>Name</th>
+                        <th class="hide-mobile">Email</th> <!-- HIDDEN -->
+                        <th>Role</th>
+                        <th class="hide-mobile">Plan</th>  <!-- HIDDEN -->
+                        <th>Status</th>
+                        <th class="hide-mobile">Joined</th> <!-- HIDDEN -->
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model.Users)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@u.FullName</td>
+                            <td class="text-muted small">@u.Email</td>
+                            <td>
+                                @if (u.Role == "Admin")
+                                {
+                                    <span class="badge bg-danger">Admin</span>
+                                }
+                                else if (u.Role == "Recruiter")
+                                {
+                                    <span class="badge bg-primary">Recruiter</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info text-dark">JobSeeker</span>
+                                }
+                            </td>
+                            <td>
+                                @if (u.CurrentPlan != "Free")
+                                {
+                                    <span class="badge bg-warning text-dark">@u.CurrentPlan</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Free</span>
+                                }
+                            </td>
+                            <td>
+                                @if (u.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </td>
+                            <td class="small text-muted">@u.CreatedAt.ToString("MMM dd, yyyy")</td>
+                            <td class="text-end">
+                                <form asp-action="ToggleUserActive" asp-route-id="@u.UserId" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit"
+                                            class="btn btn-sm @(u.IsActive ? "btn-outline-danger" : "btn-outline-success")"
+                                            onclick="return confirm('Are you sure?');">
+                                        @if (u.IsActive)
+                                        {
+                                            <i class="bi bi-slash-circle"></i> <text>Deactivate</text>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-check-circle"></i> <text>Activate</text>
+                                        }
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

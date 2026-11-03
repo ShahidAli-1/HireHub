@@ -1,0 +1,186 @@
+﻿@model HireHub.ViewModels.Applications.ApplicantsListViewModel
+@{
+    ViewData["Title"] = "Kanban Board";
+    Layout = "_RecruiterLayout";
+
+    var columns = new[] {
+        new { Status = "Applied", Title = "New Applied", Color = "primary", Icon = "bi-inbox" },
+        new { Status = "Shortlisted", Title = "Shortlisted", Color = "info", Icon = "bi-star" },
+        new { Status = "Interview", Title = "Interviewing", Color = "warning", Icon = "bi-camera-video" },
+        new { Status = "Hired", Title = "Hired", Color = "success", Icon = "bi-check-circle" },
+        new { Status = "Rejected", Title = "Rejected", Color = "danger", Icon = "bi-x-circle" }
+    };
+}
+
+<style>
+    .kanban-board {
+        display: flex;
+        gap: 1.5rem;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+        min-height: 65vh;
+    }
+
+    .kanban-column {
+        flex: 0 0 320px;
+        background-color: #f1f5f9;
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .kanban-header {
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 0.25rem;
+    }
+
+    .kanban-cards {
+        flex-grow: 1;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .kanban-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        cursor: grab;
+        border-left: 4px solid transparent;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .kanban-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .kanban-card:active {
+        cursor: grabbing;
+    }
+
+    .sortable-ghost {
+        opacity: 0.4;
+        background-color: #e2e8f0;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h1 class="page-title">Kanban Board</h1>
+        <p class="page-subtitle">Drag and drop candidates to update their status.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Applicants" class="btn btn-outline-secondary">
+            <i class="bi bi-table"></i> Table View
+        </a>
+        <!-- Filter dropdown -->
+        <form method="get" asp-action="Kanban" class="d-flex">
+            <select name="jobId" class="form-select" onchange="this.form.submit()" style="min-width: 200px;">
+                <option value="">All Jobs</option>
+                @foreach (var job in Model.RecruiterJobs)
+                {
+                    if (Model.SelectedJobId == job.JobId)
+                    {
+                        <option value="@job.JobId" selected>@job.Title</option>
+                    }
+                    else
+                    {
+                        <option value="@job.JobId">@job.Title</option>
+                    }
+                }
+            </select>
+        </form>
+    </div>
+</div>
+
+<div class="kanban-board">
+    @foreach (var col in columns)
+    {
+        var appsInCol = Model.Applications.Where(a => a.Status == col.Status).ToList();
+        
+        <div class="kanban-column">
+            <div class="kanban-header">
+                <div class="text-dark">
+                    <i class="bi @col.Icon text-@col.Color"></i> @col.Title
+                </div>
+                <span class="badge bg-@col.Color rounded-pill">@appsInCol.Count</span>
+            </div>
+            
+            <div class="kanban-cards" data-status="@col.Status">
+                @foreach (var app in appsInCol)
+                {
+                    <div class="kanban-card" data-app-id="@app.ApplicationId">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0">@app.JobSeeker?.FullName</h6>
+                        </div>
+                        <div class="small text-muted mb-2">
+                            <i class="bi bi-briefcase"></i> @app.Job?.Title
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">@app.AppliedAt.ToString("MMM dd")</small>
+                            <a asp-action="ApplicantDetails" asp-route-id="@app.ApplicationId" class="btn btn-sm btn-light border" title="View Details">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <!-- Include SortableJS from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+    <script>
+        // Initialize Sortable on each column
+        document.querySelectorAll('.kanban-cards').forEach(function (column) {
+            new Sortable(column, {
+                group: 'kanban',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    var itemEl = evt.item;  // dragged HTMLElement
+                    var toList = evt.to;    // target list
+                    
+                    var applicationId = itemEl.getAttribute('data-app-id');
+                    var newStatus = toList.getAttribute('data-status');
+
+                    // Send AJAX request to update status
+                    fetch('/Recruiter/UpdateKanbanStatus', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify({
+                            applicationId: parseInt(applicationId),
+                            status: newStatus
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            alert('Failed to update status. Refreshing page.');
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Refreshing page.');
+                        window.location.reload();
+                    });
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,78 @@
+﻿@{
+    ViewData["Title"] = "Free ATS Resume Checker";
+    Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
+}
+
+<div class="container py-5" style="max-width: 800px;">
+    
+    <div class="text-center mb-5 fade-in-up">
+        <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold">
+            <i class="bi bi-stars"></i> AI-Powered Tool
+        </span>
+        <h1 class="display-4 fw-bold mb-3" style="letter-spacing: -1px;">Free ATS Resume Checker</h1>
+        <p class="lead text-muted">
+            Recruiters use Applicant Tracking Systems (ATS) to filter resumes. Upload yours to see if you'll pass the automated test.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5">
+        <div class="card-body p-5">
+            
+            <!-- Limit Reached / Error Banner -->
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-warning border-0 rounded-3 text-center mb-4 shadow-sm">
+                    <h4 class="fw-bold text-dark"><i class="bi bi-lock-fill"></i> Limit Reached</h4>
+                    <p class="mb-3 text-dark">@TempData["Error"]</p>
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-dark rounded-pill px-4 fw-semibold">
+                            Sign Up Free <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Subscription" asp-action="Plans" class="btn btn-dark rounded-pill px-4 fw-semibold">
+                            Upgrade Plan <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    }
+                </div>
+            }
+
+            <form asp-action="Analyze" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                
+                <!-- Upload Resume -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold fs-5">Upload your Resume</label>
+                    <input type="file" name="ResumeFile" class="form-control form-control-lg bg-light" accept=".pdf,.doc,.docx" required />
+                    <small class="text-muted">PDF or DOCX files only. We will run a general ATS check on this file.</small>
+                </div>
+
+                <!-- Centered, smaller button -->
+                <button type="submit" class="btn btn-primary px-4 py-2 fw-bold rounded-pill shadow-sm d-block mx-auto">
+                    <i class="bi bi-magic"></i> Check ATS Score
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Trust Badges -->
+    <div class="row text-center mt-5">
+        <div class="col-4">
+            <i class="bi bi-shield-check text-success fs-2 mb-2"></i>
+            <h6 class="fw-bold">100% Secure</h6>
+            <small class="text-muted">Files are processed instantly and never stored.</small>
+        </div>
+        <div class="col-4">
+            <i class="bi bi-lightning-charge text-warning fs-2 mb-2"></i>
+            <h6 class="fw-bold">Instant Results</h6>
+            <small class="text-muted">Get your keyword match score in seconds.</small>
+        </div>
+        <div class="col-4">
+            <i class="bi bi-patch-check text-primary fs-2 mb-2"></i>
+            <h6 class="fw-bold">Real ATS Logic</h6>
+            <small class="text-muted">Scans just like companies like Workday & Taleo.</small>
+        </div>
+    </div>
+</div>

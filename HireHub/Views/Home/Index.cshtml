@@ -1,0 +1,393 @@
+﻿@{
+    ViewData["Title"] = "Find Your Dream Job";
+    Layout = "_Layout";
+}
+
+<style>
+    /* Modern Font */
+    @@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    .hirehub-landing {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        overflow-x: hidden;
+    }
+
+    /* Dynamic Animated Mesh Background */
+    .mesh-hero {
+        background-color: #030712;
+        background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+        position: relative;
+        padding: 120px 0 100px 0;
+        color: white;
+        overflow: hidden;
+    }
+
+    /* Animated blobs */
+    .blob {
+        position: absolute;
+        filter: blur(80px);
+        z-index: 0;
+        opacity: 0.6;
+        animation: float 10s infinite ease-in-out alternate;
+    }
+
+    .blob-1 {
+        top: -10%;
+        left: -10%;
+        width: 500px;
+        height: 500px;
+        background: #4f46e5;
+        border-radius: 50%;
+    }
+
+    .blob-2 {
+        bottom: -10%;
+        right: -10%;
+        width: 600px;
+        height: 600px;
+        background: #db2777;
+        border-radius: 50%;
+        animation-delay: -5s;
+    }
+
+    /* Gradient Text */
+    .text-gradient {
+        background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+        font-weight: 800;
+    }
+
+    /* Stunning Glassmorphism Search Box */
+    .glass-search {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 100px;
+        padding: 8px 8px 8px 24px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+        .glass-search:focus-within {
+            border-color: rgba(167, 139, 250, 0.5);
+            box-shadow: 0 0 30px rgba(167, 139, 250, 0.2);
+        }
+
+        .glass-search input {
+            background: transparent;
+            border: none;
+            color: white;
+            width: 100%;
+            outline: none;
+            font-size: 1.1rem;
+        }
+
+            .glass-search input::placeholder {
+                color: #94a3b8;
+            }
+
+        .glass-search button {
+            border-radius: 100px;
+            padding: 12px 32px;
+            font-weight: 600;
+        }
+
+    /* Floating 3D Job Card */
+    .job-card-3d {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 32px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        transform: perspective(1000px) rotateY(-10deg) rotateX(5deg);
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: float-card 6s ease-in-out infinite;
+        position: relative;
+        z-index: 10;
+    }
+
+        .job-card-3d:hover {
+            transform: perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1.02);
+        }
+
+    /* Modern Feature Cards */
+    .feature-box {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        padding: 40px 32px;
+        height: 100%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+        .feature-box:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+            border-color: transparent;
+        }
+
+    .icon-wrapper {
+        width: 64px;
+        height: 64px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 24px;
+        transition: transform 0.3s ease;
+    }
+
+    .feature-box:hover .icon-wrapper {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* Animations */
+    @@keyframes float {
+        0% {
+            transform: translate(0, 0) scale(1);
+        }
+
+        100% {
+            transform: translate(30px, -30px) scale(1.05);
+        }
+    }
+
+    @@keyframes float-card {
+        0% {
+            transform: perspective(1000px) rotateY(-10deg) rotateX(5deg) translateY(0);
+        }
+
+        50% {
+            transform: perspective(1000px) rotateY(-10deg) rotateX(5deg) translateY(-15px);
+        }
+
+        100% {
+            transform: perspective(1000px) rotateY(-10deg) rotateX(5deg) translateY(0);
+        }
+    }
+</style>
+
+<div class="hirehub-landing">
+
+    <!-- ================= HERO SECTION ================= -->
+    <div class="mesh-hero">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+
+        <div class="container position-relative" style="z-index: 2;">
+            <div class="row align-items-center">
+
+                <!-- Left Content -->
+                <div class="col-lg-6">
+                    <div class="d-inline-flex align-items-center gap-2 mb-4 px-3 py-2 rounded-pill"
+                         style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                        <span class="badge bg-primary rounded-pill">New</span>
+                        <span class="text-white small fw-semibold">Free HireHub is live 🚀</span>
+                    </div>
+
+                    <h1 class="display-3 fw-bold mb-4" style="line-height: 1.1; letter-spacing: -1px;">
+                        Find Your Next<br />
+                        <span class="text-gradient">Dream Job</span> Today.
+                    </h1>
+
+                    <p class="fs-5 mb-5" style="color: #94a3b8; max-width: 480px;">
+                        Connect with top employers, apply with one click, and use our AI tools to land the job faster.
+                    </p>
+
+                    <!-- Search Bar -->
+                    <form asp-controller="Jobs" asp-action="Index" method="get" class="glass-search mb-4" style="max-width: 550px;">
+                        <i class="bi bi-search text-muted me-2" style="font-size: 1.2rem;"></i>
+                        <input type="text" name="search" placeholder="Job title, keywords, or company..." />
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </form>
+                </div>
+
+                <!-- Right Visual (3D Card) -->
+                <div class="col-lg-6 d-none d-lg-block">
+                    <div class="job-card-3d">
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-white rounded-4 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                    <i class="bi bi-google text-danger" style="font-size: 1.8rem;"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-1 text-white fw-bold">Senior Software Engineer</h4>
+                                    <div class="text-muted small"><i class="bi bi-geo-alt-fill me-1"></i> Lahore, Pakistan</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-light rounded-circle p-2" style="width: 40px; height: 40px;">
+                                <i class="bi bi-bookmark"></i>
+                            </button>
+                        </div>
+
+                        <div class="mb-4">
+                            <span class="badge bg-primary bg-opacity-25 text-primary me-2 px-3 py-2">Full Time</span>
+                            <span class="badge bg-success bg-opacity-25 text-success px-3 py-2">$5k - $8k / mo</span>
+                        </div>
+
+                        <p class="text-muted mb-4" style="font-size: 0.95rem; line-height: 1.6;">
+                            We are looking for an experienced .NET developer to join our core engineering team. You will be responsible for building scalable web applications...
+                        </p>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary w-100 py-2 fw-semibold rounded-3">Apply Now</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= CORE FEATURES (BENTO GRID) ================= -->
+    <div class="bg-light" style="padding: 100px 0;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold display-5 mb-3" style="letter-spacing: -1px;">Everything you need to succeed.</h2>
+                <p class="text-muted fs-5">Powerful tools for both Job Seekers and Recruiters.</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Feature 1: Browse Jobs -->
+                <div class="col-lg-4">
+                    <div class="feature-box text-center">
+                        <div class="icon-wrapper bg-primary bg-opacity-10 text-primary mx-auto">
+                            <i class="bi bi-briefcase-fill"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Browse Jobs</h4>
+                        <p class="text-muted mb-4">
+                            Explore thousands of active listings from verified companies. Filter by category, location, and salary.
+                        </p>
+                        <a asp-controller="Jobs" asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">
+                            Find Jobs <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Feature 2: Resume Checker -->
+                <div class="col-lg-4">
+                    <div class="feature-box text-center">
+                        <div class="icon-wrapper bg-success bg-opacity-10 text-success mx-auto">
+                            <i class="bi bi-file-earmark-bar-graph"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">ATS Resume Checker</h4>
+                        <p class="text-muted mb-4">
+                            Is your resume getting rejected by robots? Scan it instantly to see your ATS compatibility score.
+                        </p>
+                        <a asp-controller="ResumeTools" asp-action="Index" class="btn btn-outline-success rounded-pill px-4">
+                            Check Score <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Feature 3: For Recruiters -->
+                <div class="col-lg-4">
+                    <div class="feature-box text-center">
+                        <div class="icon-wrapper bg-warning bg-opacity-10 text-warning mx-auto">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">For Recruiters</h4>
+                        <p class="text-muted mb-4">
+                            Post jobs, manage applicants with a visual Kanban board, and find top talent in Pakistan.
+                        </p>
+                        <a asp-controller="Account" asp-action="Register" asp-route-role="Recruiter" class="btn btn-outline-warning rounded-pill px-4">
+                            Post a Job <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= FEATURE DETAIL SHOWCASE ================= -->
+    <div class="bg-white" style="padding: 100px 0;">
+        <div class="container">
+
+            <!-- ATS Checker Showcase -->
+            <div class="row align-items-center mb-5 pb-5 flex-lg-row-reverse">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <span class="badge bg-success bg-opacity-10 text-success mb-3 px-3 py-2 rounded-pill fw-bold">AI Resume Tools</span>
+                    <h2 class="display-6 fw-bold mb-4">Beat the robots. Get hired faster.</h2>
+                    <p class="lead text-muted mb-4">
+                        Over 75% of resumes are rejected by ATS (Applicant Tracking Systems) before a human ever sees them. Our free tool scans your resume exactly like an ATS and tells you exactly what to fix.
+                    </p>
+                    <ul class="list-unstyled text-muted mb-4">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Check for essential sections (Experience, Education, Skills)</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Detect if your resume is readable by robots</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Get instant actionable feedback</li>
+                    </ul>
+                    <a asp-controller="ResumeTools" asp-action="Index" class="btn btn-success btn-lg px-4 rounded-pill shadow-sm">
+                        Check Your Resume Now
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    <!-- Mock Result Card -->
+                    <div class="p-5 bg-dark rounded-4 shadow-lg text-center text-white border border-secondary">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle border border-5 border-success mb-3"
+                             style="width: 120px; height: 120px;">
+                            <h1 class="display-4 fw-bold text-success mb-0">85%</h1>
+                        </div>
+                        <h5 class="fw-bold">Excellent Match!</h5>
+                        <p class="text-muted mt-2 small">Your resume passed 8 out of 10 ATS checks.</p>
+                        <div class="mt-4 text-start">
+                            <div class="text-success small mb-1"><i class="bi bi-check-circle"></i> Contact info found</div>
+                            <div class="text-success small mb-1"><i class="bi bi-check-circle"></i> Good use of action verbs</div>
+                            <div class="text-danger small"><i class="bi bi-x-circle"></i> Missing 'Projects' section</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5" />
+
+            <!-- Trust & Privacy Section (Moved to Bottom) -->
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <span class="badge bg-info bg-opacity-10 text-info mb-3 px-3 py-2 rounded-pill fw-bold">Trust & Safety</span>
+                    <h2 class="display-6 fw-bold mb-4">Your privacy is our priority.</h2>
+                    <p class="lead text-muted mb-4">
+                        We never sell your data. Your resume is only shared with recruiters when you explicitly apply for a job. Read our full policy to learn how we protect you.
+                    </p>
+                    <a asp-controller="Home" asp-action="Privacy" class="btn btn-outline-dark btn-lg px-4 rounded-pill">
+                        Read Privacy Policy <i class="bi bi-shield-check ms-2"></i>
+                    </a>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <i class="bi bi-shield-lock-fill text-primary" style="font-size: 12rem; opacity: 0.1;"></i>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= CTA SECTION ================= -->
+    <div class="bg-primary bg-gradient py-5 text-white">
+        <div class="container py-5 text-center">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <h2 class="fw-bold display-5 mb-4">Ready to take the next step?</h2>
+                    <p class="fs-5 mb-5 text-white-50">Join thousands of job seekers and top companies building their future on HireHub.</p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a asp-controller="Account" asp-action="Register" asp-route-role="JobSeeker" class="btn btn-light text-primary btn-lg px-5 py-3 fw-bold rounded-pill shadow">
+                            <i class="bi bi-person-badge me-2"></i> I'm a Job Seeker
+                        </a>
+                        <a asp-controller="Account" asp-action="Register" asp-route-role="Recruiter" class="btn btn-outline-light btn-lg px-5 py-3 fw-bold rounded-pill">
+                            <i class="bi bi-briefcase me-2"></i> I'm a Recruiter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

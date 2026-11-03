@@ -1,0 +1,150 @@
+﻿@model HireHub.ViewModels.Jobs.EditJobViewModel
+@{
+    ViewData["Title"] = "Edit Job";
+    Layout = "_RecruiterLayout";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="page-title">Edit Job</h1>
+        <p class="page-subtitle">Update the details of your job post.</p>
+    </div>
+    <a asp-action="MyJobs" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to My Jobs
+    </a>
+</div>
+
+<form asp-action="EditJob" method="post" id="editJobForm">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="JobId" />
+    <input type="hidden" asp-for="Status" />
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <div class="section-card">
+        <h5><i class="bi bi-info-circle"></i> Job Basics</h5>
+
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label asp-for="Title" class="form-label">Job Title <span class="text-danger">*</span></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="CategoryId" class="form-label">Category <span class="text-danger">*</span></label>
+                <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="JobType" class="form-label">Job Type <span class="text-danger">*</span></label>
+                <select asp-for="JobType" class="form-select">
+                    <option value="FullTime">Full Time</option>
+                    <option value="PartTime">Part Time</option>
+                    <option value="Remote">Remote</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Contract">Contract</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="ExperienceLevel" class="form-label">Experience Level</label>
+                <select asp-for="ExperienceLevel" class="form-select">
+                    <option value="">-- Select --</option>
+                    <option value="Entry">Entry Level (0-2 years)</option>
+                    <option value="Mid">Mid Level (2-5 years)</option>
+                    <option value="Senior">Senior Level (5+ years)</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Deadline" class="form-label">Application Deadline</label>
+                <input asp-for="Deadline" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Location" class="form-label">Location</label>
+                <input asp-for="Location" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="SalaryRange" class="form-label">Salary Range</label>
+                <input asp-for="SalaryRange" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h5><i class="bi bi-file-text"></i> Job Description <span class="text-danger">*</span></h5>
+        
+        <!-- THIS IS THE FIX: We bind the hidden input directly with asp-for -->
+        <input type="hidden" asp-for="Description" id="descriptionInput" />
+        
+        <div id="quillEditor" style="height: 220px; background:white;"></div>
+        <span asp-validation-for="Description" class="text-danger small d-block mt-1"></span>
+    </div>
+
+    <div class="section-card">
+        <h5><i class="bi bi-list-check"></i> Requirements</h5>
+        <textarea asp-for="Requirements" class="form-control" rows="5"></textarea>
+    </div>
+
+    <div class="d-flex gap-2 mb-5">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> Save Changes
+        </button>
+        <a asp-action="MyJobs" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.snow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.js"></script>
+
+    <script>
+        // Get initial description from hidden input
+        const initialContent = document.getElementById('descriptionInput').value || '';
+
+        // Initialize Quill
+        const quill = new Quill('#quillEditor', {
+            theme: 'snow',
+            placeholder: 'Describe the role...',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'header': [1, 2, 3, false] }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['link'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Load existing HTML into Quill
+        if (initialContent) {
+            // Use clipboard to safely load HTML without destroying formatting
+            quill.clipboard.dangerouslyPasteHTML(initialContent);
+        }
+
+        const form = document.getElementById('editJobForm');
+        const hiddenInput = document.getElementById('descriptionInput');
+
+        // Sync Quill content to hidden input on form submit
+        form.addEventListener('submit', function (e) {
+            const htmlContent = quill.root.innerHTML;
+            const textContent = quill.getText().trim();
+
+            hiddenInput.value = htmlContent;
+
+            if (!textContent) {
+                e.preventDefault();
+                alert('Please write a job description before saving.');
+            }
+        });
+    </script>
+}

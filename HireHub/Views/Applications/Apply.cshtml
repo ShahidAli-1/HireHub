@@ -1,0 +1,144 @@
+﻿@model HireHub.ViewModels.Applications.ApplyJobViewModel
+@{
+    ViewData["Title"] = "Apply for Job";
+    Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
+
+    var job = Model.Job;
+    var company = job?.Recruiter?.RecruiterProfile;
+}
+
+<div class="my-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Jobs" asp-action="Index">Jobs</a></li>
+            <li class="breadcrumb-item">
+                <a asp-controller="Jobs" asp-action="Detail" asp-route-id="@Model.JobId">@job?.Title</a>
+            </li>
+            <li class="breadcrumb-item active">Apply</li>
+        </ol>
+    </nav>
+
+    <h1 class="fw-bold mb-1">Apply for this Job</h1>
+    <p class="text-muted mb-4">Review your details and write a short cover letter.</p>
+
+    <div class="row g-4">
+        <!-- ===== FORM ===== -->
+        <div class="col-lg-7">
+            <form asp-action="Apply" method="post" enctype="multipart/form-data" class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="JobId" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <!-- Resume Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold mb-3">Select Resume</label>
+                        
+                        @if (Model.HasProfileResume)
+                        {
+                            <div class="form-check mb-2 p-3 border rounded bg-light">
+                                <input class="form-check-input ms-1" type="radio" asp-for="UseNewResume" value="false" id="useProfileResume" checked>
+                                <label class="form-check-label ms-2 w-100" for="useProfileResume">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong class="text-dark">Use Profile Resume</strong>
+                                            <div class="small text-muted">Default resume attached to your profile</div>
+                                        </div>
+                                        <a href="@Model.ProfileResumePath" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </div>
+                                </label>
+                            </div>
+                        }
+
+                        <div class="form-check p-3 border rounded">
+                            <input class="form-check-input ms-1" type="radio" asp-for="UseNewResume" value="true" id="useNewResume" checked="@(Model.HasProfileResume ? false : true)">
+                            <label class="form-check-label ms-2 w-100" for="useNewResume">
+                                <strong class="text-dark">Upload New Resume for this Job</strong>
+                                <div class="small text-muted mb-2">Tailor your resume specifically for this role</div>
+                                
+                                <input asp-for="NewResumeFile" type="file" class="form-control form-control-sm" accept=".pdf,.doc,.docx" />
+                                <span asp-validation-for="NewResumeFile" class="text-danger small"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Cover letter -->
+                    <div class="mb-4">
+                        <label asp-for="CoverLetter" class="form-label fw-semibold">
+                            Cover Letter <span class="text-danger">*</span>
+                        </label>
+                        <textarea asp-for="CoverLetter" class="form-control" rows="8"
+                                  placeholder="Tell the recruiter why you're a great fit for this role..."></textarea>
+                        <span asp-validation-for="CoverLetter" class="text-danger small"></span>
+                        <small class="text-muted d-block mt-1">
+                            200-500 words is ideal. Mention relevant experience and why you're excited about this role.
+                        </small>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Submit Application
+                        </button>
+                        <a asp-controller="Jobs" asp-action="Detail" asp-route-id="@Model.JobId"
+                           class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- ===== JOB SUMMARY ===== -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="text-muted small text-uppercase mb-2">You're applying for</h6>
+                    <h5 class="fw-bold mb-2">@job?.Title</h5>
+
+                    <div class="text-muted small mb-3">
+                        <i class="bi bi-building"></i> @(company?.CompanyName ?? "Company")
+                        <br />
+                        <i class="bi bi-geo-alt"></i> @(job?.Location ?? "Not specified")
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-primary">@job?.JobType</span>
+                        <span class="badge bg-secondary">@job?.Category?.Name</span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(job?.SalaryRange))
+                    {
+                        <div class="small mb-2">
+                            <i class="bi bi-cash text-success"></i>
+                            <strong>@job.SalaryRange</strong>
+                        </div>
+                    }
+
+                    @if (job?.Deadline != null)
+                    {
+                        <div class="small text-muted">
+                            <i class="bi bi-calendar-event"></i>
+                            Deadline: @job.Deadline.Value.ToString("MMM dd, yyyy")
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll('input[name="UseNewResume"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                if (this.value === 'true') {
+                    document.getElementById('useNewResume').focus();
+                }
+            });
+        });
+    </script>
+}

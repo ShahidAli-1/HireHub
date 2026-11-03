@@ -1,0 +1,89 @@
+﻿@model HireHub.ViewModels.Profiles.CompanyProfileViewModel
+@{
+    ViewData["Title"] = "Company Profile";
+    Layout = "_RecruiterLayout";
+}
+
+<h1 class="page-title">Company Profile</h1>
+<p class="page-subtitle">This information will be visible to job seekers.</p>
+
+<form asp-action="CompanyProfile" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="section-card">
+                <h5 class="mb-3">Company Details</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="CompanyName" class="form-label">Company Name *</label>
+                        <input asp-for="CompanyName" class="form-control" />
+                        <span asp-validation-for="CompanyName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FullName" class="form-label">Your Name (Contact Person) *</label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Industry" class="form-label">Industry</label>
+                        <input asp-for="Industry" class="form-control" placeholder="e.g. IT & Software" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CompanySize" class="form-label">Company Size</label>
+                        <select asp-for="CompanySize" class="form-select">
+                            <option value="">-- Select --</option>
+                            <option value="1-10">1-10 employees</option>
+                            <option value="11-50">11-50 employees</option>
+                            <option value="51-200">51-200 employees</option>
+                            <option value="201-500">201-500 employees</option>
+                            <option value="500+">500+ employees</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Website" class="form-label">Website</label>
+                        <input asp-for="Website" class="form-control" placeholder="https://example.com" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Location" class="form-label">Headquarters Location</label>
+                        <input asp-for="Location" class="form-control" placeholder="e.g. Karachi, Pakistan" />
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="About" class="form-label">About Company</label>
+                        <textarea asp-for="About" class="form-control" rows="5" placeholder="Tell job seekers about your company culture, mission, and what makes it a great place to work..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="section-card text-center">
+                <h5 class="mb-3">Company Logo</h5>
+                
+                @if (!string.IsNullOrEmpty(Model.ExistingLogoPath))
+                {
+                    <img src="@Model.ExistingLogoPath" class="img-fluid rounded mb-3 shadow-sm" style="max-height: 150px;" alt="Logo" />
+                }
+                else
+                {
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 120px; height: 120px;">
+                        <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                }
+
+                <label asp-for="LogoFile" class="form-label small text-muted">Upload New Logo (JPG/PNG)</label>
+                <input asp-for="LogoFile" type="file" class="form-control form-control-sm mb-2" accept=".jpg,.jpeg,.png" />
+                <span asp-validation-for="LogoFile" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2">
+                <i class="bi bi-check-circle"></i> Save Profile
+            </button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

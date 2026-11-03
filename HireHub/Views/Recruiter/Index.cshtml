@@ -1,0 +1,184 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_RecruiterLayout";
+
+    var user = ViewBag.User as HireHub.Models.User;
+    var recentJobs = ViewBag.RecentJobs as List<HireHub.Models.Job> ?? new();
+    var recentApps = ViewBag.RecentApplications as List<HireHub.Models.Application> ?? new();
+}
+
+<h1 class="page-title">
+    Welcome, @(user?.RecruiterProfile?.CompanyName ?? user?.FullName ?? "Recruiter") 💼
+</h1>
+<p class="page-subtitle">Manage your job posts and candidates in one place.</p>
+
+<!-- ====== STAT CARDS ====== -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-indigo"><i class="bi bi-briefcase"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.TotalJobs</div>
+                <div class="stat-label">Total Jobs</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-green"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.ActiveJobs</div>
+                <div class="stat-label">Active Jobs</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-blue"><i class="bi bi-people"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.TotalApplications</div>
+                <div class="stat-label">Applications</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-yellow"><i class="bi bi-star"></i></div>
+            <div>
+                <div class="stat-value">@ViewBag.Shortlisted</div>
+                <div class="stat-label">Shortlisted</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== QUICK ACTIONS ====== -->
+<div class="section-card">
+    <h5>Quick Actions</h5>
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="PostJob" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Post a New Job
+        </a>
+        <a asp-action="MyJobs" class="btn btn-outline-primary">
+            <i class="bi bi-list-check"></i> Manage Jobs
+        </a>
+        <a asp-action="Applicants" class="btn btn-outline-primary">
+            <i class="bi bi-people"></i> View Applicants
+        </a>
+        <a asp-action="CompanyProfile" class="btn btn-outline-secondary">
+            <i class="bi bi-building"></i> Company Profile
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- ====== RECENT JOBS ====== -->
+    <div class="col-lg-7">
+        <div class="section-card">
+            <h5>
+                My Recent Jobs
+                <a asp-action="MyJobs" class="btn btn-sm btn-outline-primary">View All</a>
+            </h5>
+
+            @if (!recentJobs.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-briefcase"></i>
+                    <p>You haven't posted any jobs yet.</p>
+                    <a asp-action="PostJob" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle"></i> Post Your First Job
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Applications</th>
+                                <th>Posted</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var job in recentJobs)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-action="EditJob" asp-route-id="@job.JobId" class="text-decoration-none fw-semibold">
+                                            @job.Title
+                                        </a>
+                                        @if (job.IsFeatured)
+                                        {
+                                            <span class="badge bg-warning text-dark ms-1">
+                                                <i class="bi bi-star-fill"></i>
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (job.Status == "Active")
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@job.Status</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            @job.ApplicationCount
+                                        </span>
+                                    </td>
+                                    <td class="text-muted small">@job.CreatedAt.ToString("MMM dd")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- ====== RECENT APPLICATIONS ====== -->
+    <div class="col-lg-5">
+        <div class="section-card">
+            <h5>
+                Recent Applicants
+                <a asp-action="Applicants" class="btn btn-sm btn-outline-primary">View All</a>
+            </h5>
+
+            @if (!recentApps.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-person-plus"></i>
+                    <p>No applications yet.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var app in recentApps)
+                {
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="fw-semibold text-dark">@app.JobSeeker?.FullName</div>
+                                <div class="small text-muted">
+                                    applied for <strong>@app.Job?.Title</strong>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge-soft @app.Status.ToLower()">@app.Status</span>
+                                <div class="small text-muted mt-1">
+                                    @app.AppliedAt.ToString("MMM dd")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
