@@ -66,3 +66,20 @@ HireHub is a complete, full-stack 3-role Job Marketplace built with **ASP.NET Co
     ```bash
     git clone https://github.com/ShahidAli-1/HireHub.git
     
+2.  **Setup the Database & Secrets:**
+Open appsettings.example.json and rename it to appsettings.json.
+
+Update the DefaultConnection string with your SQL Server details.
+
+Update the Email section with your Gmail address and App Password.
+    
+3.  **Apply Migrations:**
+Open the Package Manager Console in Visual Studio and run:
+Update-Database
+
+4.  **Run the App:**
+Press F5 in Visual Studio. The database will automatically seed with an Admin account:
+
+Admin Email: admin@hirehub.pk
+
+Admin Password: Admin@123
